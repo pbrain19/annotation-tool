@@ -44,7 +44,25 @@ You must respond with VALID JSON ONLY (no markdown, no code blocks, no explanati
 Each action must follow these EXACT patterns:
 
 **For Subject-Based Actions:**
-- Format: \`For all emails that have subject "Exact Subject Text"\` OR \`For emails that contain "keyword" in the subject\`
+
+⚠️ **CRITICAL: Check if ALL emails with same subject are affected**
+
+BEFORE using "For all emails with subject X", you MUST verify:
+1. Count how many emails have the SAME subject in the initial state (look at unchanged lines and - lines)
+2. Count how many of those emails show the SAME change in the diff (look at + lines)
+3. If counts match → Use "For all emails with subject X"
+4. If counts DON'T match → Be SPECIFIC with sender
+
+**When ALL emails with same subject are changed:**
+- Format: \`For all emails that have subject "Exact Subject Text"\`
+- Example: If there are 3 emails with subject "Event invitation" and ALL 3 are marked as read → "For all emails with subject \\"Event invitation\\", mark them as read"
+
+**When ONLY SOME emails with same subject are changed:**
+- Format: \`For the email with subject "Exact Subject Text" from [Name] <email@domain.com>\`
+- Example: If there are 3 emails with subject "Event invitation" but only 1 from John is marked as read → "For the email with subject \\"Event invitation\\" from John Smith <john@example.com>, mark it as read"
+- ALWAYS include the sender's name and email address in this case
+
+**General rules:**
 - Always use the EXACT subject text from the initial state
 - Use double quotes around subject text
 - Be case-sensitive - use exact capitalization from initial state
@@ -60,14 +78,17 @@ Each action must follow these EXACT patterns:
 - Format: \`mark them as read\`, \`add a star\`, \`add a "work" label\`
 
 **WHAT YOU MUST DO:**
+- ✅ **VERIFY COMPLETENESS**: Check if ALL emails with same subject are changed before using "For all emails with subject X"
+- ✅ **BE SPECIFIC**: If only SOME emails with same subject changed, identify by sender: "For the email with subject X from Name <email>"
 - ✅ Use EXACT subject text from initial state (case-sensitive)
 - ✅ Use EXACT email addresses when specifying people: Name <email@domain.com>
-- ✅ For replies: ALWAYS include subject, reply subject, and body text
+- ✅ For replies: ALWAYS include subject, reply subject, and full body text
 - ✅ Specify location when relevant: "in my inbox", "in primary folder"
 - ✅ Use structured format for actions (see examples below)
 - ✅ Use double quotes around all subject text and body text
 
 **WHAT YOU MUST NOT DO:**
+- ❌ **NO FALSE "ALL EMAILS" CLAIMS**: Never say "For all emails with subject X" if only SOME are changed in the diff
 - ❌ NO email IDs (id: abc123)
 - ❌ NO emdashes (—) use regular dashes (-)
 - ❌ NO examples in parentheses
@@ -113,6 +134,22 @@ For emails sent to me that contain "Q1" or "Q2" or "Q3" in the subject mark them
 For emails sent to me that contain "Q4" in the subject, please mark them as important and star them.
 
 Also thank Tammy Ford <tammie.ford@startup.io> for her welcome email.
+\`\`\`
+
+**Example 5 - Partial Subject Match (ONLY SOME emails with same subject changed):**
+\`\`\`
+I need to organize my inbox and prioritize important messages from specific people.
+
+For the email with subject "Project Update" from Sarah Chen <sarah.chen@company.com>, mark it as important and add a star.
+
+For the email with subject "Meeting Notes" from David Lee <david.lee@company.com>, mark it as read.
+\`\`\`
+
+**Example 6 - Full Subject Match (ALL emails with same subject changed):**
+\`\`\`
+I received multiple event invitations that I need to decline because I'm traveling next week.
+
+For all emails with subject "Team Social Event", reply with subject "Re: Team Social Event" and body: "Thanks for the invitation, but I'll be traveling and cannot attend."
 \`\`\`
 
 **NOTICE THE PATTERN:**
@@ -237,6 +274,7 @@ async function generateWithOpenAI(
 
   const completion = await openai.chat.completions.create({
     model: model,
+    reasoning_effort: "high",
     messages: [
       {
         role: "system",
