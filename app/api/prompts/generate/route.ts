@@ -4,43 +4,25 @@ import OpenAI from "openai";
 
 const PROMPT_GENERATION_SYSTEM = (
   difficulty: string
-) => `You are an expert at analyzing email data and creating realistic task scenarios for email management systems.
+) => `You are an expert at analyzing email data changes and creating realistic task prompts that would result in those changes.
 
 # YOUR TASK
-Analyze the provided initial email state JSON and generate a realistic, contextual task prompt that an actual user might give to an email assistant.
+Analyze the provided inline diff showing email state changes and generate a realistic, contextual task prompt that an actual user might have given to produce these exact changes.
 
-# DIFFICULTY LEVEL: ${difficulty.toUpperCase()}
+# COMPLEXITY ANALYSIS
+Automatically determine the complexity based on the changes you see:
+- **Simple**: 1-2 basic property changes (mark as read, star, apply label)
+- **Moderate**: 3-5 actions or basic conditional logic
+- **Complex**: Multiple emails affected, replies created, sophisticated filtering
 
-${
-  difficulty === "easy"
-    ? `
-**EASY DIFFICULTY GUIDELINES:**
-- Generate 1-2 simple, straightforward actions
-- Actions: mark as read, star, unstar, apply single label, archive
-- Example: "Mark all emails from John as read" or "Star the email about the budget"
-`
-    : difficulty === "medium"
-    ? `
-**MEDIUM DIFFICULTY GUIDELINES:**
-- Generate 3-5 actions with basic conditional logic
-- Use "if subject contains X, then do Y" patterns
-- Combine multiple simple actions
-- Example: "For emails with 'Q1' in subject, mark as read. For emails with 'Q4', mark as important and star them."
-`
-    : `
-**HARD DIFFICULTY GUIDELINES:**
-- Generate complex multi-step tasks with replies, categorization, and multiple conditions
-- Include drafting replies with specific content
-- Use sophisticated filtering and categorization logic
-- Example: "For all event invitations, reply declining politely and mark as read. For order confirmations, apply receipts label."
-`
-}
+Generate a prompt that matches the complexity you observe in the diff.
 
 # ANALYSIS INSTRUCTIONS
 
-1. **Extract Exact Patterns**: Find exact subject lines, sender emails/names from the initial state
-2. **Create Context**: Write a natural 1-2 sentence backstory explaining why these actions are needed
-3. **Generate Precise Actions**: Create specific, structured instructions based on the patterns found
+1. **Extract Exact Patterns**: Find exact subject lines, sender emails/names from the inline diff (look at unchanged lines and - lines for initial state)
+2. **Identify Changes**: Analyze + lines to see what actions were taken (added emails, changed properties, etc.)
+3. **Create Context**: Write a natural 1-2 sentence backstory explaining why these actions are needed
+4. **Generate Precise Actions**: Create specific, structured instructions that would result in these exact changes
 
 # OUTPUT REQUIREMENTS
 
@@ -182,10 +164,10 @@ Example inline diff format:
 5. **Valid JSON**: Your entire response must be valid JSON
 6. **Prompt vs Diff**: The prompt should be CONVERSATIONAL (no email IDs, no examples), but the inlineDiff should be TECHNICAL (with all proper structure)
 
-Now analyze the following initial state and generate the prompt + inline diff:`;
+Now analyze the following inline diff and generate the prompt that would result in these changes:`;
 
 async function generateWithClaude(
-  initialState: string,
+  inlineDiff: string,
   difficulty: string
 ): Promise<any> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -207,12 +189,12 @@ async function generateWithClaude(
         role: "user",
         content: `${PROMPT_GENERATION_SYSTEM(difficulty)}
 
-# INITIAL STATE
-\`\`\`json
-${initialState}
+# INLINE DIFF (showing before and after state)
+\`\`\`
+${inlineDiff}
 \`\`\`
 
-Generate the prompt and inline diff now (JSON only):`,
+Generate the prompt that would result in these changes (JSON only with prompt and inlineDiff fields):`,
       },
     ],
   });
@@ -239,7 +221,7 @@ Generate the prompt and inline diff now (JSON only):`,
 }
 
 async function generateWithOpenAI(
-  initialState: string,
+  inlineDiff: string,
   difficulty: string
 ): Promise<any> {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -262,12 +244,12 @@ async function generateWithOpenAI(
       },
       {
         role: "user",
-        content: `# INITIAL STATE
-\`\`\`json
-${initialState}
+        content: `# INLINE DIFF (showing before and after state)
+\`\`\`
+${inlineDiff}
 \`\`\`
 
-Generate the prompt and inline diff now (JSON only):`,
+Generate the prompt that would result in these changes (JSON only with prompt and inlineDiff fields):`,
       },
     ],
     response_format: { type: "json_object" },
@@ -286,35 +268,30 @@ Generate the prompt and inline diff now (JSON only):`,
 
 export async function POST(request: NextRequest) {
   try {
-    const { initialState, difficulty } = await request.json();
+    const { inlineDiff } = await request.json();
 
     console.log("=== PROMPT GENERATION REQUEST ===");
-    console.log("Initial state length:", initialState?.length || 0);
-    console.log("Difficulty:", difficulty);
+    console.log("Inline diff length:", inlineDiff?.length || 0);
     console.log("Provider:", process.env.AI_PROVIDER || "claude");
     console.log("=== END REQUEST ===");
 
-    if (!initialState || !initialState.trim()) {
+    if (!inlineDiff || !inlineDiff.trim()) {
       return NextResponse.json(
-        { error: "Initial state is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!["easy", "medium", "hard"].includes(difficulty?.toLowerCase())) {
-      return NextResponse.json(
-        { error: "Difficulty must be easy, medium, or hard" },
+        { error: "Inline diff is required" },
         { status: 400 }
       );
     }
 
     const provider = process.env.AI_PROVIDER || "claude";
 
+    // Auto-determine difficulty from diff complexity (not used in generation, just for logging)
+    const difficulty = "auto";
+
     let result;
     if (provider === "openai") {
-      result = await generateWithOpenAI(initialState, difficulty);
+      result = await generateWithOpenAI(inlineDiff, difficulty);
     } else if (provider === "claude") {
-      result = await generateWithClaude(initialState, difficulty);
+      result = await generateWithClaude(inlineDiff, difficulty);
     } else {
       return NextResponse.json(
         {
@@ -330,7 +307,14 @@ export async function POST(request: NextRequest) {
     console.log("Inline diff length:", result.inlineDiff?.length || 0);
     console.log("=== END SUCCESS ===");
 
-    return NextResponse.json(result, { status: 200 });
+    // Return the same inline diff that was passed in
+    return NextResponse.json(
+      {
+        prompt: result.prompt,
+        inlineDiff: inlineDiff, // Use the input diff, not generated one
+      },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error("=== PROMPT GENERATION ERROR ===");
     console.error("Error type:", error.constructor.name);
