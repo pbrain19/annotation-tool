@@ -464,123 +464,133 @@ You must respond with VALID JSON ONLY (no markdown, no code blocks, no explanati
 - Examples: "I need to clear my mailbox of personal things so I can focus on ending the quarter strong."
 - Or: "I have some strong upcoming deadlines and need to focus on work."
 
-**PART 2: Specific Actions (Structured format)**
-Each action must follow these EXACT patterns:
+**PART 2: Specific Actions (Natural, conversational format)**
+Write actions as if speaking naturally to someone. NO bullet points, NO rigid templates, NO email addresses.
 
-**For Subject-Based Actions:**
+**Natural Flow Guidelines:**
 
 ⚠️ **CRITICAL: Check if ALL emails with same subject are affected**
 
-BEFORE using "For all emails with subject X", you MUST verify:
+BEFORE referencing multiple emails, you MUST verify:
 1. Count how many emails have the SAME subject in the initial state (look at unchanged lines and - lines)
 2. Count how many of those emails show the SAME change in the diff (look at + lines)
-3. If counts match → Use "For all emails with subject X"
-4. If counts DON'T match → Be SPECIFIC with sender
+3. If counts match → Reference all emails with that subject
+4. If counts DON'T match → Be SPECIFIC with sender name only
 
 **When ALL emails with same subject are changed:**
-- Format: \`For all emails that have subject "Exact Subject Text"\`
-- Example: If there are 3 emails with subject "Event invitation" and ALL 3 are marked as read → "For all emails with subject \\"Event invitation\\", mark them as read"
+- Natural format: \`Label all emails with the subject "Exact Subject Text" as [label]\`
+- Or: \`Mark all the "Event invitation" emails as read\`
+- Example: If there are 3 emails with subject "Event invitation" and ALL 3 are marked as read → "Mark all the event invitation emails as read"
 
 **When ONLY SOME emails with same subject are changed:**
-- Format: \`For the email with subject "Exact Subject Text" from [Name] <email@domain.com>\`
-- Example: If there are 3 emails with subject "Event invitation" but only 1 from John is marked as read → "For the email with subject \\"Event invitation\\" from John Smith <john@example.com>, mark it as read"
-- ALWAYS include the sender's name and email address in this case
+- Natural format: \`Mark the "Exact Subject Text" email from [Name] as read\`
+- Or: \`Label the order confirmation from John Smith as personal\`
+- Example: If there are 3 emails with subject "Event invitation" but only 1 from John is marked as read → "Mark the event invitation from John Smith as read"
+- ONLY use the sender's name (NO email addresses)
 
 **General rules:**
 - Always use the EXACT subject text from the initial state
-- Use double quotes around subject text
+- Use double quotes around subject text when being specific
 - Be case-sensitive - use exact capitalization from initial state
+- Write in natural spoken English, as if telling someone what to do
+- NO bullet points - use connecting words like "then", "after that", "also", "next"
 
 **For Reply Actions:**
-- Format: \`For all emails that have subject "Event invitation", reply with subject "Re: Event invitation" and body: "Your exact reply text here."\`
-- OR: \`Reply to [Name] <email@domain.com> that has the subject "Subject Text" with subject "Re: Subject" and body: "Reply text here."\`
-- MUST include: exact subject, reply subject, and full body text
-- Use email addresses in angle brackets format
+- Natural format: \`Reply to [Name] saying "Your message here" and label it as [label]\`
+- Or: \`Send a reply to the "Subject Text" email from [Name] with "Reply message" and add a [label] tag\`
+- MUST include: who you're replying to, the message body
+- NO email addresses in angle brackets
 
 **For Basic Actions:**
-- Mark as read, mark as important, add a star, add [label name] label
-- Format: \`mark them as read\`, \`add a star\`, \`add a "work" label\`
+- Natural spoken language: \`mark them as read\`, \`add a star\`, \`label it as work\`, \`tag them as personal\`
+- Connect actions smoothly: \`Then mark...\`, \`After that...\`, \`Also...\`, \`Next...\`
 
 **WHAT YOU MUST DO:**
-- ✅ **VERIFY COMPLETENESS**: Check if ALL emails with same subject are changed before using "For all emails with subject X"
-- ✅ **BE SPECIFIC**: If only SOME emails with same subject changed, identify by sender: "For the email with subject X from Name <email>"
+- ✅ **VERIFY COMPLETENESS**: Check if ALL emails with same subject are changed before referencing all of them
+- ✅ **BE SPECIFIC**: If only SOME emails with same subject changed, identify by sender name only: "the email from John Smith"
 - ✅ Use EXACT subject text from initial state (case-sensitive)
-- ✅ Use EXACT email addresses when specifying people: Name <email@domain.com>
-- ✅ For replies: ALWAYS include subject, reply subject, and full body text
-- ✅ Specify location when relevant: "in my inbox", "in primary folder"
-- ✅ Use structured format for actions (see examples below)
-- ✅ Use double quotes around all subject text and body text
+- ✅ Write in NATURAL SPOKEN ENGLISH - sound like a human talking, not a robot
+- ✅ For replies: ALWAYS include who you're replying to and the full message body
+- ✅ Specify location when relevant but naturally: "in my inbox", "in the primary folder"
+- ✅ Connect actions with natural flow words: "then", "after that", "also", "next"
+- ✅ Use double quotes around exact subject text and message bodies
 
 **WHAT YOU MUST NOT DO:**
-- ❌ **NO FALSE "ALL EMAILS" CLAIMS**: Never say "For all emails with subject X" if only SOME are changed in the diff
+- ❌ **NO FALSE "ALL EMAILS" CLAIMS**: Never say all emails if only SOME are changed in the diff
+- ❌ NO email addresses in angle brackets: Name <email@domain.com>
+- ❌ NO bullet points - use flowing natural text
 - ❌ NO email IDs (id: abc123)
 - ❌ NO emdashes (—) use regular dashes (-)
 - ❌ NO examples in parentheses
 - ❌ NO vague references - be specific with exact text
 - ❌ NO negative instructions ("don't delete", "keep everything as-is")
 - ❌ NO technical jargon
+- ❌ NO robotic or template-like language
 
 # APPROVED EXAMPLES (USE THESE AS TEMPLATES)
 
 **Example 1:**
 \`\`\`
-I have to clear my mailbox of personal things so I can focus on ending the quarter strong.
+I need to organize and respond to several order confirmation emails in my inbox.
 
-For all the emails with subject "Event invitation" in my inbox, reply to them with subject "Re: Event invitation" and body: "Sorry but I will not attend."
+First, label all emails with the subject "Your order confirmation" as personal. Then mark the order confirmation emails from Shane Williams and Sherri Moran as read.
 
-Add a star to emails whose subject contains "quarterly results" or "Re: Quick question".
+After that, send quick replies. Reply to Shane Williams saying "Shane, thanks for the reminder." and label it as personal. Reply to Sherri Moran saying "Sheri, thank you for the reminder." and tag it with both travel and personal labels. Reply to Anthony Lambert saying "Anthony, thanks for the update." and add a personal label.
 \`\`\`
 
 **Example 2:**
 \`\`\`
-I am working on some end-of-year accounting and projections analysis, and I need help organizing my Gmail's primary folder.
+I have to clear my mailbox of personal things so I can focus on ending the quarter strong.
 
-For emails that contain "order confirmation" or "quarterly results" or "project update" in the subject, mark them as important and add a "work" label.
-
-I need you to reply to Thomas Brown's email <thomas.brown@corp.co> that has the subject "Re: Quick question" with subject "Re: Quick question" and body: "Hi Thomas, please check back next week for a final answer." and add a star to it.
+Reply to all the event invitation emails saying "Sorry but I will not attend." Then add a star to emails with "quarterly results" or "Re: Quick question" in the subject.
 \`\`\`
 
 **Example 3:**
 \`\`\`
-I have some strong upcoming deadlines and need to focus on work. I keep getting invitations to events and order confirmations that just distract me.
+I am working on some end-of-year accounting and projections analysis, and I need help organizing my inbox.
 
-For all emails that have the subject "Event invitation", reply with subject "Re: Event invitation" and body: "Hi, I will not be able to attend, but I hope you have a great event." and mark them as read.
+Mark emails with "order confirmation" or "quarterly results" or "project update" in the subject as important and add a work label to them.
 
-For all emails that have the subject "Your order confirmation", mark them as read and add a receipts label.
+Also reply to Thomas Brown saying "Hi Thomas, please check back next week for a final answer." and add a star to it.
 \`\`\`
 
 **Example 4:**
 \`\`\`
-It is Q3, and we have a bunch of messages that we need to clear up from last quarter and some messages that require attention for the upcoming quarter.
+I have some strong upcoming deadlines and need to focus on work. I keep getting invitations to events and order confirmations that just distract me.
 
-For emails sent to me that contain "Q1" or "Q2" or "Q3" in the subject mark them as read.
-
-For emails sent to me that contain "Q4" in the subject, please mark them as important and star them.
-
-Also thank Tammy Ford <tammie.ford@startup.io> for her welcome email.
+Reply to all the event invitation emails with "Hi, I will not be able to attend, but I hope you have a great event." and mark them as read. Then mark all the order confirmation emails as read and add a receipts label.
 \`\`\`
 
-**Example 5 - Partial Subject Match (ONLY SOME emails with same subject changed):**
+**Example 5:**
+\`\`\`
+It is Q3, and we have a bunch of messages that we need to clear up from last quarter and some messages that require attention for the upcoming quarter.
+
+Mark all emails with Q1, Q2, or Q3 in the subject as read. Then mark the Q4 emails as important and star them.
+
+Also thank Tammy Ford for her welcome email.
+\`\`\`
+
+**Example 6 - Partial Subject Match (ONLY SOME emails with same subject changed):**
 \`\`\`
 I need to organize my inbox and prioritize important messages from specific people.
 
-For the email with subject "Project Update" from Sarah Chen <sarah.chen@company.com>, mark it as important and add a star.
-
-For the email with subject "Meeting Notes" from David Lee <david.lee@company.com>, mark it as read.
+Mark the project update email from Sarah Chen as important and add a star. Then mark the meeting notes from David Lee as read.
 \`\`\`
 
-**Example 6 - Full Subject Match (ALL emails with same subject changed):**
+**Example 7 - Full Subject Match (ALL emails with same subject changed):**
 \`\`\`
 I received multiple event invitations that I need to decline because I'm traveling next week.
 
-For all emails with subject "Team Social Event", reply with subject "Re: Team Social Event" and body: "Thanks for the invitation, but I'll be traveling and cannot attend."
+Reply to all the "Team Social Event" emails saying "Thanks for the invitation, but I'll be traveling and cannot attend."
 \`\`\`
 
 **NOTICE THE PATTERN:**
-1. Natural context sentence(s)
+1. Natural context sentence(s) explaining the situation
 2. Blank line
-3. Specific structured actions using exact subject text
-4. Each action is clear, precise, and uses exact matching criteria
+3. Actions flow naturally using connecting words - NO bullet points
+4. Sounds like spoken instructions, not robotic commands
+5. No email addresses - just names
+6. Each action is specific with exact subject text when needed
 
 Now analyze the following inline diff and generate a natural, conversational prompt that would result in these changes:`;
 
