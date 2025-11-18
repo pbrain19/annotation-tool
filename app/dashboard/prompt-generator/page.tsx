@@ -26,6 +26,7 @@ import {
   DollarSign,
   Cpu,
 } from "lucide-react";
+import { PROMPT_GENERATION_SYSTEM } from "@/lib/prompt";
 
 interface RubricItem {
   criterion: string;
@@ -123,6 +124,7 @@ export default function PromptGenerator() {
   const [filterType, setFilterType] = useState<
     "all" | "required" | "non-required"
   >("all");
+  const [copiedSystemPrompt, setCopiedSystemPrompt] = useState(false);
 
   const generatePrompt = async () => {
     if (!inlineDiff.trim()) {
@@ -324,6 +326,16 @@ export default function PromptGenerator() {
       await navigator.clipboard.writeText(gradingFunction);
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  const copySystemPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(PROMPT_GENERATION_SYSTEM("auto"));
+      setCopiedSystemPrompt(true);
+      setTimeout(() => setCopiedSystemPrompt(false), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -573,6 +585,23 @@ export default function PromptGenerator() {
               </div>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={copySystemPrompt}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2"
+                title="Copy system prompt used to generate prompts"
+              >
+                {copiedSystemPrompt ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Copy System Prompt
+                  </>
+                )}
+              </button>
               {currentStep > 1 && (
                 <button
                   onClick={resetToStep1}
@@ -668,7 +697,9 @@ export default function PromptGenerator() {
                   className="w-full h-96 p-4 bg-zinc-900 border-2 border-zinc-700 text-zinc-100 placeholder-zinc-500 rounded-lg focus:ring-2 focus:ring-purple-600 focus:outline-none resize-none font-mono text-sm transition-colors"
                 />
                 <p className="text-xs text-zinc-500 mt-2">
-                  Paste your inline diff with + and - markers. The AI will automatically analyze the complexity and generate an appropriate prompt.
+                  Paste your inline diff with + and - markers. The AI will
+                  automatically analyze the complexity and generate an
+                  appropriate prompt.
                 </p>
               </div>
 

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { GitBranch, AlertCircle, CheckCircle, ArrowRight, ListChecks, CheckCircle2, XCircle, AlertTriangle, Copy, Star, Clock, DollarSign, Cpu } from 'lucide-react';
+import { GitBranch, AlertCircle, CheckCircle, ArrowRight, ListChecks, CheckCircle2, XCircle, AlertTriangle, Copy, Star, Clock, DollarSign, Cpu, Check } from 'lucide-react';
+import { TASK_CHECKLIST_PROMPT } from '@/lib/prompt';
 
 interface TaskChecklistItem {
   task: string;
@@ -51,6 +52,7 @@ export default function JsonValidatorV2() {
   const [error, setError] = useState<string | null>(null);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [copiedQuery, setCopiedQuery] = useState<number | null>(null);
+  const [copiedSystemPrompt, setCopiedSystemPrompt] = useState(false);
 
   const validateChanges = async () => {
     setError(null);
@@ -114,6 +116,22 @@ export default function JsonValidatorV2() {
     navigator.clipboard.writeText(query);
     setCopiedQuery(index);
     setTimeout(() => setCopiedQuery(null), 2000);
+  };
+
+  const copySystemPrompt = async () => {
+    if (!inlineDiff.trim() || !prompt.trim()) {
+      setError('Please provide both inline diff and prompt first');
+      return;
+    }
+    try {
+      const promptText = TASK_CHECKLIST_PROMPT(inlineDiff, prompt);
+      await navigator.clipboard.writeText(promptText);
+      setCopiedSystemPrompt(true);
+      setTimeout(() => setCopiedSystemPrompt(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      setError('Failed to copy prompt to clipboard');
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -227,12 +245,32 @@ export default function JsonValidatorV2() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={loadExample}
-              className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 font-medium py-2 px-4 rounded-lg transition-colors text-sm"
-            >
-              Load Example
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={copySystemPrompt}
+                disabled={!inlineDiff.trim() || !prompt.trim()}
+                className="bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2"
+                title="Copy task checklist prompt with your inputs"
+              >
+                {copiedSystemPrompt ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Copy Prompt
+                  </>
+                )}
+              </button>
+              <button
+                onClick={loadExample}
+                className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+              >
+                Load Example
+              </button>
+            </div>
           </div>
 
           {/* Inline Diff Input */}

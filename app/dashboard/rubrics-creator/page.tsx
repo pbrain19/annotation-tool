@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ClipboardCheck, AlertCircle, GitBranch, ArrowRight, Copy, Check, ChevronDown, ChevronUp, Download, FileJson, FileText, FileSpreadsheet, MessageSquare } from 'lucide-react';
+import { RUBRICS_SYSTEM_PROMPT } from '@/lib/prompt';
 
 interface RubricItem {
   criterion: string;
@@ -29,6 +30,7 @@ export default function RubricsCreator() {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'required' | 'non-required'>('all');
+  const [copiedSystemPrompt, setCopiedSystemPrompt] = useState(false);
 
   const generateRubrics = async () => {
     if (!inlineDiff.trim() || !prompt.trim()) {
@@ -84,6 +86,16 @@ export default function RubricsCreator() {
       await navigator.clipboard.writeText(gradingFunction);
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const copySystemPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(RUBRICS_SYSTEM_PROMPT);
+      setCopiedSystemPrompt(true);
+      setTimeout(() => setCopiedSystemPrompt(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -281,12 +293,31 @@ export default function RubricsCreator() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={loadExample}
-              className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 font-medium py-2 px-4 rounded-lg transition-colors text-sm"
-            >
-              Load Example
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={copySystemPrompt}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm flex items-center gap-2"
+                title="Copy system prompt used to generate rubrics"
+              >
+                {copiedSystemPrompt ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Copy System Prompt
+                  </>
+                )}
+              </button>
+              <button
+                onClick={loadExample}
+                className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+              >
+                Load Example
+              </button>
+            </div>
           </div>
 
           {/* Input Section */}
